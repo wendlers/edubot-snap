@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import blockext
+import blockext.generate
 import threading
 import remote
 
@@ -15,16 +16,28 @@ class EduBot(threading.Thread):
         self.port = port
         self.bot = None
 
-    def run(self):
-
-        desc = blockext.Descriptor(
-                name="EduBot",
-                port=self.port,
-                blocks=blockext.get_decorated_blocks_from_class(EduBot),
-                menus=dict(drive=["forward", "backward", "left", "right"]),
+        self.desc = blockext.Descriptor(
+            name=self.name,
+            port=self.port,
+            blocks=blockext.get_decorated_blocks_from_class(EduBot),
+            menus=dict(drive=["forward", "backward", "left", "right"]),
         )
 
-        extension = blockext.Extension(EduBot, desc)
+    @property
+    def name(self):
+        return "edubot"
+
+    @property
+    def description(self):
+        return "EduBot Blocks"
+
+    def generate_snap(self):
+        language = self.desc.translations["en"]
+        return blockext.generate.generate_snap(self.desc, language)
+
+    def run(self):
+
+        extension = blockext.Extension(EduBot, self.desc)
         extension.run_forever(debug=True)
 
     def _problem(self):

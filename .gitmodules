@@ -4,3 +4,6 @@
 [submodule "ext/blockext"]
 	path = ext/blockext
 	url = https://github.com/blockext/blockext.git
+[submodule "ext/bottle"]
+	path = ext/bottle
+	url = https://github.com/bottlepy/bottle.git
