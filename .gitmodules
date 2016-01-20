@@ -1,0 +1,6 @@
+[submodule "ext/snap"]
+	path = ext/snap
+	url = https://github.com/jmoenig/Snap--Build-Your-Own-Blocks.git
+[submodule "ext/blockext"]
+	path = ext/blockext
+	url = https://github.com/blockext/blockext.git
