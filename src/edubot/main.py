@@ -1,6 +1,7 @@
 import snap
 import server
-import subprocess
+import client
+import os
 
 
 if __name__ == "__main__":
@@ -11,9 +12,9 @@ if __name__ == "__main__":
     snp_srv = server.Httpd(snap_exts=[ext_bot])
     snp_srv.start()
 
-    result = subprocess.call(["google-chrome",
-                              "--app=http://localhost:10000/snap/snap.html",
-                              "--user-data-dir=/home/stefan/.edubot"])
+    snp_cli = client.Browser(url="http://localhost:10000/snap/snap.html",
+                             user_data_dir=os.path.join(os.path.expanduser('~'), ".edubot"))
+    ret = snp_cli.start()
 
-    exit(result)
+    exit(ret)
 
