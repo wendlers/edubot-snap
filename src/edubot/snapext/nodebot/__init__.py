@@ -1,12 +1,18 @@
 from __future__ import unicode_literals
 
+import threading
+
 import blockext
 import blockext.generate
-import threading
-import remote
+
+import edubot.snapext.nodebot.remote
+
+from edubot.snapext import Singleton
 
 
-class EduBot(threading.Thread):
+class Blocks(threading.Thread):
+
+    __metaclass__ = Singleton
 
     def __init__(self, port=10001):
 
@@ -19,17 +25,17 @@ class EduBot(threading.Thread):
         self.desc = blockext.Descriptor(
             name=self.name,
             port=self.port,
-            blocks=blockext.get_decorated_blocks_from_class(EduBot),
+            blocks=blockext.get_decorated_blocks_from_class(Blocks),
             menus=dict(drive=["forward", "backward", "left", "right"]),
         )
 
     @property
     def name(self):
-        return "edubot"
+        return "nodebot"
 
     @property
     def description(self):
-        return "EduBot Blocks"
+        return "EduBot NodeMCU"
 
     def generate_snap(self):
         language = self.desc.translations["en"]
@@ -37,7 +43,7 @@ class EduBot(threading.Thread):
 
     def run(self):
 
-        extension = blockext.Extension(EduBot, self.desc)
+        extension = blockext.Extension(Blocks, self.desc)
         extension.run_forever(debug=True)
 
     def _problem(self):
@@ -51,7 +57,7 @@ class EduBot(threading.Thread):
         print(host)
         if host is not None:
             try:
-                self.bot = remote.Robot(host=host)
+                self.bot = edubot.snapext.nodebot.remote.Robot(host=host)
             except Exception as e:
                 print(e)
                 print("bot", self.bot)

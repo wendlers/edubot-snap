@@ -1,46 +1,53 @@
 import threading
-from bottle import static_file, route, run
+from bottle import static_file, Bottle
 
 
-class Httpd(threading.Thread):
+class App(Bottle):
 
-    _snap_exts = []
+    def __init__(self, doc_root=".", snap_extensions={}):
 
-    def __init__(self, port=10000, doc_root="../../ext/snap", snap_exts={}):
+        Bottle.__init__(self)
 
-        threading.Thread.__init__(self)
+        self.doc_root = doc_root
+        self.snap_extensions = snap_extensions
 
-        self.daemon = True
-        self.port = port
+        self.route("/snap/libraries/<file_path>", callback=self.serve_library)
+        self.route("/snap/<file_path:path>", callback=self.serve_snap)
 
-        Httpd._snap_exts += snap_exts
-
-    @staticmethod
-    @route("/snap/libraries/<filepath>")
-    def serve_library(filepath):
+    def serve_library(self, file_path):
 
         res = ""
 
-        if filepath == "LIBRARIES":
+        if file_path == "LIBRARIES":
 
-            for ext in Httpd._snap_exts:
+            for ext in self.snap_extensions:
                 res += "%s.xml\t%s\n" % (ext.name, ext.description)
 
         else:
 
-            for ext in Httpd._snap_exts:
-                if ext.name == filepath[:-4]:
+            for ext in self.snap_extensions:
+                if ext.name == file_path[:-4]:
                     res = ext.generate_snap()
                     break
 
         # TODO: if no matching ext. found, error response needed
         return res
 
-    @staticmethod
-    @route("/snap/<filepath:path>")
-    def serve_snap(filepath):
-        return static_file(filepath, root="../../ext/snap")
+    def serve_snap(self, file_path):
+        return static_file(file_path, root=self.doc_root)
+
+
+class Httpd(threading.Thread):
+
+    def __init__(self, host="localhost", port=10000, doc_root="../../ext/snap", snap_extensions={}):
+
+        threading.Thread.__init__(self)
+
+        self.daemon = True
+        self.host = host
+        self.port = port
+        self.app = App(doc_root, snap_extensions)
 
     def run(self):
 
-        run(host='localhost', port=10000, quiet=False, debug=True)
+        self.app.run(host=self.host, port=self.port, quiet=False, debug=True)

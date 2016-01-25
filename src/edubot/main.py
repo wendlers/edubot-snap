@@ -1,15 +1,21 @@
-import snap
-import server
-import client
 import os
+
+import client
+import server
+
+import snapext.nodebot as nodebot
+import snapext.joystick as joystick
 
 
 if __name__ == "__main__":
 
-    ext_bot = snap.EduBot()
+    ext_bot = nodebot.Blocks()
     ext_bot.start()
 
-    snp_srv = server.Httpd(snap_exts=[ext_bot])
+    ext_js = joystick.Blocks()
+    ext_js.start()
+
+    snp_srv = server.Httpd(snap_extensions=[ext_bot, ext_js])
     snp_srv.start()
 
     snp_cli = client.Browser(url="http://localhost:10000/snap/snap.html",
