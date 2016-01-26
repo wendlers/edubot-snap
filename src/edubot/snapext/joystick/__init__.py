@@ -6,18 +6,16 @@ import threading
 import blockext
 import blockext.generate
 
-from edubot.snapext import Singleton
+import edubot.snapext
 
 
 class Blocks(threading.Thread):
 
-    __metaclass__ = Singleton
+    __metaclass__ = edubot.snapext.Singleton
 
     def __init__(self, port=10002):
 
         threading.Thread.__init__(self)
-
-        print("**** init", self)
 
         self.daemon = True
         self.port = port
@@ -71,7 +69,6 @@ class Blocks(threading.Thread):
         return blockext.generate.generate_snap(self.desc, language)
 
     def run(self):
-
         extension = blockext.Extension(Blocks, self.desc)
         extension.run_forever(debug=True)
 
