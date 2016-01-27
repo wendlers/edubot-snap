@@ -9,10 +9,10 @@ import snapext.joystick as joystick
 
 if __name__ == "__main__":
 
-    ext_bot = nodebot.Blocks()
+    ext_bot = nodebot.Extension()
     ext_bot.start()
 
-    ext_js = joystick.Blocks()
+    ext_js = joystick.Extension()
     ext_js.start()
 
     snp_srv = server.Httpd(

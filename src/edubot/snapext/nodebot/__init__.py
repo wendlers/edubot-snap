@@ -9,42 +9,11 @@ import edubot.snapext
 import edubot.snapext.nodebot.remote
 
 
-class Blocks(threading.Thread):
+class Blocks:
 
-    __metaclass__ = edubot.snapext.Singleton
-
-    def __init__(self, port=10001):
-
-        threading.Thread.__init__(self)
-
-        self.daemon = True
-        self.port = port
+    def __init__(self):
         self.bot = None
-
-        self.desc = blockext.Descriptor(
-            name=self.name,
-            port=self.port,
-            blocks=blockext.get_decorated_blocks_from_class(Blocks),
-            menus=dict(
-                    drive=["forward", "backward", "left", "right"],
-                    speed=[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]),
-        )
-
-    @property
-    def name(self):
-        return "nodebot"
-
-    @property
-    def description(self):
-        return "EduBot NodeMCU"
-
-    def generate_snap(self):
-        language = self.desc.translations["en"]
-        return blockext.generate.generate_snap(self.desc, language)
-
-    def run(self):
-        extension = blockext.Extension(Blocks, self.desc)
-        extension.run_forever(debug=True)
+        self.speed = {"A": 0, "B": 0}
 
     def _problem(self):
         pass
@@ -52,7 +21,7 @@ class Blocks(threading.Thread):
     def _on_reset(self):
         pass
 
-    @blockext.command("NodeBot connect %s", defaults=["192.168.1.122"], is_blocking=True)
+    @blockext.command("NodeBot connect %s", defaults=["ESP_06F38E"], is_blocking=True)
     def connect(self, host=None):
         print(host)
         if host is not None:
@@ -68,7 +37,7 @@ class Blocks(threading.Thread):
         if self.bot is not None:
             self.bot.stop()
 
-    @blockext.command("NodeBot drive %m.drive speed %m.speed", defaults=["forward", 80], is_blocking=True)
+    @blockext.command("NodeBot drive %m.drive speed %n", defaults=["forward", 80], is_blocking=True)
     def drive(self, direction, speed):
 
         if self.bot is not None:
@@ -85,6 +54,14 @@ class Blocks(threading.Thread):
             if direction == "right":
                 self.bot.right(speed)
 
+    @blockext.command("NodeBot motor %m.motor speed %n", defaults=["A", 0], is_blocking=True)
+    def motor(self, motor, speed):
+
+        self.speed[motor] = speed
+
+        if self.bot is not None:
+            self.bot.drive(self.speed["A"], self.speed["B"])
+
     @blockext.reporter("NodeBot sees obstacle")
     def obstacle(self):
 
@@ -96,3 +73,16 @@ class Blocks(threading.Thread):
                 r = o
 
         return r
+
+
+class Extension(edubot.snapext.BaseExtension):
+
+    def __init__(self, port=10001):
+        edubot.snapext.BaseExtension.__init__(
+                self,
+                Blocks,
+                port,
+                "nodebot",
+                "EduBot NodeMCU",
+                dict(drive=["forward", "backward", "left", "right"],
+                     motor=["A", "B"]))
