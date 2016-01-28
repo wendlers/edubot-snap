@@ -1,5 +1,7 @@
 import os
 import threading
+import pkg_resources
+
 from bottle import static_file, Bottle
 
 
@@ -35,6 +37,7 @@ class App(Bottle):
         # TODO: if no matching ext. found, error response needed
         return res
 
+    '''
     def serve_snap(self, file_path):
 
         root = self.doc_root_snap
@@ -43,6 +46,48 @@ class App(Bottle):
             root = self.doc_root_overlay
 
         return static_file(file_path, root=root)
+    '''
+
+    def serve_snap(self, file_path):
+
+        file_path = "snap/" + file_path
+
+        print("file_path", file_path)
+
+        if pkg_resources.resource_exists("overlay", file_path):
+            module = "overlay"
+        else:
+            module = "ext"
+
+        content = pkg_resources.resource_string(module, file_path)
+        root = os.path.join(os.path.expanduser('~'), ".edubot/cache")
+        print("root", root)
+        if not os.path.exists(root):
+            os.makedirs(root)
+
+        file_name = "%x" % hash(file_path)
+        resource = os.path.join(root, file_name)
+
+        if not os.path.exists(resource):
+
+            print("file_name", file_name)
+            print("resource", resource)
+
+            with open(resource, "wb") as f:
+                f.write(content)
+        else:
+            print("cache hit!")
+
+        '''
+        # resource = pkg_resources.resource_filename(module, file_path)
+
+        root = os.path.dirname(resource)
+        file_name = os.path.basename(resource)
+
+        print("res=%s, dir=%s, base=%s" % (resource, root, file_name))
+        '''
+
+        return static_file(file_name, root=root)
 
 
 class Httpd(threading.Thread):
