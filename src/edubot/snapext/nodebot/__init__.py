@@ -31,13 +31,13 @@ class Blocks:
                 print(e)
                 print("bot", self.bot)
 
-    @blockext.command("NodeBot stop", is_blocking=True)
+    @blockext.command("NodeBot stop", is_blocking=False)
     def stop(self):
 
         if self.bot is not None:
             self.bot.stop()
 
-    @blockext.command("NodeBot drive %m.drive speed %n", defaults=["forward", 80], is_blocking=True)
+    @blockext.command("NodeBot drive %m.drive speed %n", defaults=["forward", 80], is_blocking=False)
     def drive(self, direction, speed):
 
         if self.bot is not None:
@@ -54,7 +54,7 @@ class Blocks:
             if direction == "right":
                 self.bot.right(speed)
 
-    @blockext.command("NodeBot motor %m.motor speed %n", defaults=["A", 0], is_blocking=True)
+    @blockext.command("NodeBot motor %m.motor speed %n", defaults=["A", 0], is_blocking=False)
     def motor(self, motor, speed):
 
         self.speed[motor] = speed
@@ -71,6 +71,18 @@ class Blocks:
             o = self.bot.sees_obstacle()
             if o is not None:
                 r = o
+
+        return r
+
+    @blockext.reporter("NodeBot distance to obstacle")
+    def distance(self):
+
+        r = -1
+
+        if self.bot is not None:
+            d = self.bot.distance()
+            if d is not None:
+                r = d
 
         return r
 

@@ -54,4 +54,4 @@ class BaseExtension(threading.Thread):
 
     def run(self):
         extension = blockext.Extension(self.blocks_cls, self.desc)
-        extension.run_forever(debug=True)
+        extension.run_forever(debug=False)

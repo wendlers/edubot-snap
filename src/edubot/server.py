@@ -25,6 +25,8 @@
 import os
 import threading
 import pkg_resources
+import hashlib
+import binascii
 
 from bottle import static_file, Bottle
 
@@ -89,7 +91,11 @@ class App(Bottle):
         if not os.path.exists(root):
             os.makedirs(root)
 
-        file_name = "%x" % hash(file_path)
+        m = hashlib.md5()
+        m.update(file_path)
+        _, file_ext = os.path.splitext(file_path)
+
+        file_name = binascii.hexlify(m.digest()) + file_ext
         resource = os.path.join(root, file_name)
 
         if not os.path.exists(resource):
