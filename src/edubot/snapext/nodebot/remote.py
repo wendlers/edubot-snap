@@ -22,56 +22,55 @@
 # THE SOFTWARE.
 ##
 
-import telnetlib
+import requests
 
 
 class Robot:
 
     def __init__(self, host):
-        self.tn = telnetlib.Telnet(host)
 
-    def __check_response(self):
-
-        idx, _, _ = self.tn.expect([r"OK\n", r"ERROR\n"])
-        return idx == 0
+        self.base_url = "http://%s" % host
 
     def drive(self, speed_a, speed_b):
 
-        # TODO: cache previous speeds to avoid sending same speed multiple times
-
-        self.tn.write("d%+04d%+04d\n" % (speed_a, speed_b))
-        return self.__check_response()
+        r = requests.get("%s/drive?a=%d&b=%d" % (self.base_url, speed_a, speed_b))
+        return r.status_code == 200
 
     def forward(self, speed=100):
-        self.drive(speed, speed)
-        return self.__check_response()
+        return self.drive(speed, speed)
 
     def backward(self, speed=100):
-        self.drive(-speed, -speed)
-        return self.__check_response()
+        return self.drive(-speed, -speed)
 
     def left(self, speed=100):
-        self.drive(-speed, speed)
-        return self.__check_response()
+        return self.drive(-speed, speed)
 
     def right(self, speed=100):
-        self.drive(speed, -speed)
-        return self.__check_response()
+        return self.drive(speed, -speed)
 
     def stop(self):
-        self.drive(0, 0)
-        return self.__check_response()
+        return self.drive(0, 0)
 
     def sees_obstacle(self):
-        self.tn.write("o")
-        idx, _, _ = self.tn.expect([r"NO\n", r"FAR\n", r"CLOSE\n", r"ERROR\n"])
-        return None if idx == 3 else idx
+
+        d = self.distance()
+
+        if d < 25:
+            o = 2
+        elif d < 50:
+            o = 1
+        else:
+            o = 0
+
+        return o
 
     def distance(self):
-        self.tn.write("r")
-        idx, re, txt = self.tn.expect([r"ERROR\n", r"[-+]?[0-9]*\.?[0-9]+\n"])
 
-        if idx != 0:
-            return float(txt)
+        d = 0.0
 
-        return 0.0
+        r = requests.get("http://192.168.1.112/range");
+
+        if r.status_code == 200:
+            d = r.json()["d"]
+
+        return d
