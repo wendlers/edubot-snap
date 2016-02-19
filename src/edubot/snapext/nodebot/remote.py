@@ -68,9 +68,14 @@ class Robot:
 
         d = 0.0
 
-        r = requests.get("http://192.168.1.112/range");
+        r = requests.get("%s/range" % self.base_url)
 
         if r.status_code == 200:
             d = r.json()["d"]
 
         return d
+
+    def pixels(self, pixel, rgb):
+
+        r = requests.get("%s/pixels?p=%d&r=%d&g=%d&b=%d" % (self.base_url, pixel, rgb[0], rgb[1], rgb[2]))
+        return r.status_code == 200

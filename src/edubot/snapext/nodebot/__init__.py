@@ -21,7 +21,7 @@ class Blocks:
     def _on_reset(self):
         pass
 
-    @blockext.command("NodeBot connect %s", defaults=["ESP_06F38E"], is_blocking=True)
+    @blockext.command("NodeBot connect %s", defaults=["edubot.local"], is_blocking=False)
     def connect(self, host=None):
         print(host)
         if host is not None:
@@ -85,6 +85,10 @@ class Blocks:
                 r = d
 
         return r
+
+    @blockext.command("NodeBot set pixel %n to %c", is_blocking=False)
+    def pixel(self, pixel, color):
+        self.bot.pixels(pixel, color)
 
 
 class Extension(edubot.snapext.BaseExtension):
