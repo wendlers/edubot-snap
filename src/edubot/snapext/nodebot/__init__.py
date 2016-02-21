@@ -87,8 +87,12 @@ class Blocks:
         return r
 
     @blockext.command("NodeBot set pixel %n to %c", is_blocking=False)
-    def pixel(self, pixel, color):
+    def pixel_set(self, pixel, color):
         self.bot.pixels(pixel, color)
+
+    @blockext.command("NodeBot clear pixel %n", is_blocking=False)
+    def pixel_clear(self, pixel):
+        self.bot.pixels(pixel, (0, 0, 0))
 
 
 class Extension(edubot.snapext.BaseExtension):
